@@ -1,12 +1,10 @@
 package com.glowing_carnival.order_service;
 
 
+import com.glowing_carnival.order_service.stubs.InventoryClientStub;
+import io.restassured.RestAssured;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-
-// WIP
-// Error finding restAssured 
-// timelaps: 1:30:55
 
 
 import org.junit.jupiter.api.BeforeEach;
@@ -14,10 +12,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.context.annotation.Import;
 import org.testcontainers.containers.MySQLContainer;
 
-@Import(TestcontainersConfiguration.class)
+//@Import(TestcontainersConfiguration.class)
+@AutoConfigureWireMock(port = 0)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class OrderServiceApplicationTests {
 
@@ -28,8 +28,8 @@ class OrderServiceApplicationTests {
 
 	@BeforeEach
 	void setup(){
-		// RestAssured.baseURI = "http://localhost";
-		// RestAssured.port = port
+		 RestAssured.baseURI = "http://localhost";
+		 RestAssured.port = port;
 	}
 
 	static {
@@ -45,18 +45,19 @@ class OrderServiceApplicationTests {
 					"quantity": 1
 				}
 				""";
-		
+		InventoryClientStub.stubInventoryClientStub("iphone_15", 1);
 		var responseBodyString = RestAssured.given()
 				.contentType("application/json")
 				.body(submitOrderJson)
 				.when()
 				.post("/api/order")
+				.then()
 				.log().all()
 				.statusCode(201)
 				.extract()
 				.body().asString();
 		
-		MatcherAssert.assertThat(responseBodyString, Matchers.is("Order Placed Successfully"))
+		MatcherAssert.assertThat(responseBodyString, Matchers.is("Order Placed Successfully"));
 	}
 
 }
