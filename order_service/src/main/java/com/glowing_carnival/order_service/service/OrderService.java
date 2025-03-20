@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
 @Service
+// @AutoConfigureWireMock(port = ) WIP
 public class OrderService {
 
     private OrderRepository orderRepository;
@@ -17,6 +18,8 @@ public class OrderService {
     public void placeOrder (OrderRequest orderRequest) {
         boolean isProductAvailable = inventoryClient.isInStock(orderRequest.skuCode(), orderRequest.quantity());
 
+        // 1. Use Mockito -> for mocking 
+        // 2. Use WireMock
         if (!isProductAvailable){
             throw new RuntimeException("Product with SkuCode " + orderRequest.skuCode() + " is not available");
         }
